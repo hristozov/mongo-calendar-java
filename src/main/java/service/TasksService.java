@@ -37,12 +37,9 @@ public class TasksService {
                                          @PathParam("month") Integer month,
                                          @PathParam("day") Integer day) {
         DBObject dateRange = new BasicDBObject();
-        dateRange.put("$lt", new Date(year-1900, month-1, day+20, 0, 0));
-        dateRange.put("$gt", new Date(year-1900, month-1, day, 0, 0));
+        dateRange.put("$lt", new Date(year-1900, month-1, day+1, 0, 0));
+        dateRange.put("$gte", new Date(year-1900, month-1, day, 0, 0));
         DBObject query = new BasicDBObject("date", dateRange);
-
-        System.out.println(query + " " + tasks.count(query));
-
         return tasks.find(query).toArray();
     }
 

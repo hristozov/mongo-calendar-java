@@ -25,7 +25,6 @@ import java.util.TimeZone;
 
 public class DBObjectUtils {
     private static String dateToTZString(Date date) {
-        System.out.println("1 " + date + " -> " + getFormat().format(date).toString());
         return getFormat().format(date).toString();
     }
 
@@ -38,7 +37,6 @@ public class DBObjectUtils {
         } catch (ParseException e) {
             return null;
         }
-        System.out.println("1 " + string + " -> " + cal.getTime());
         return cal.getTime();
     }
 
@@ -91,7 +89,7 @@ public class DBObjectUtils {
 
         @Override
         public DBObject deserialize(JsonParser jsonParser,
-                                    DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+                                    DeserializationContext deserializationContext) throws IOException {
             Map map = jsonParser.readValueAs(Map.class);
             DBObject result = new BasicDBObject(map);
             Object id = result.get("id");
