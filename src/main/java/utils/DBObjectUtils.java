@@ -15,9 +15,43 @@ import org.codehaus.jackson.map.module.SimpleModule;
 import org.codehaus.jackson.map.ser.std.SerializerBase;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class DBObjectUtils {
+    private static String dateToTZString(Date date) {
+        System.out.println("1 " + date + " -> " + getFormat().format(date).toString());
+        return getFormat().format(date).toString();
+    }
+
+    private static Date TZStringToDate(String string) {
+        Calendar cal = getCalendar();
+        DateFormat format = getFormat();
+        format.setCalendar(cal);
+        try {
+            cal.setTime(format.parse(string));
+        } catch (ParseException e) {
+            return null;
+        }
+        System.out.println("1 " + string + " -> " + cal.getTime());
+        return cal.getTime();
+    }
+
+    private static Calendar getCalendar() {
+        return Calendar.getInstance(TimeZone.getTimeZone("EEST"));
+    }
+
+    private static DateFormat getFormat() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        simpleDateFormat.setCalendar(getCalendar());
+        return simpleDateFormat;
+    }
+
     public static ObjectMapper getMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         SimpleModule dbObjectModule = new SimpleModule("DBObjectModule", new Version(1, 0, 0, null));
@@ -38,8 +72,13 @@ public class DBObjectUtils {
                               SerializerProvider serializerProvider) throws IOException {
             Map result = dbObject.toMap();
             Object id = result.get("_id");
-            if (id != null && id instanceof ObjectId) {
-                result.put("_id", id.toString());
+            if (id instanceof ObjectId) {
+                result.put("id", id.toString());
+                result.remove("_id");
+            }
+            Object date = result.get("date");
+            if (date instanceof Date) {
+                result.put("date", dateToTZString((Date) date));
             }
             jsonGenerator.writeObject(result);
         }
@@ -53,10 +92,16 @@ public class DBObjectUtils {
         @Override
         public DBObject deserialize(JsonParser jsonParser,
                                     DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
-            DBObject result = jsonParser.readValueAs(DBObject.class);
-            Object id = result.get("_id");
+            Map map = jsonParser.readValueAs(Map.class);
+            DBObject result = new BasicDBObject(map);
+            Object id = result.get("id");
             if (id != null && id instanceof String) {
                 result.put("_id", new ObjectId((String) id));
+                result.removeField("id");
+            }
+            Object date = result.get("date");
+            if (date instanceof String) {
+                result.put("date", TZStringToDate((String) date));
             }
             return result;
         }

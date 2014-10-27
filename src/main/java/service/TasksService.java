@@ -36,25 +36,21 @@ public class TasksService {
     public List<DBObject> getTasksByData(@PathParam("year") Integer year,
                                          @PathParam("month") Integer month,
                                          @PathParam("day") Integer day) {
-        final Calendar startDate = Calendar.getInstance();
-        startDate.set(year, month, day, 0, 0);
-        final Calendar endDate = (Calendar) startDate.clone();
-        endDate.add(Calendar.DATE, 1);
+        DBObject dateRange = new BasicDBObject();
+        dateRange.put("$lt", new Date(year-1900, month-1, day+20, 0, 0));
+        dateRange.put("$gt", new Date(year-1900, month-1, day, 0, 0));
+        DBObject query = new BasicDBObject("date", dateRange);
 
-        DBObject query = new BasicDBObject("date", new BasicDBObject() {{
-            put("$lt", endDate.getTime());
-            put("$gt", startDate.getTime());
-        }});
+        System.out.println(query + " " + tasks.count(query));
+
         return tasks.find(query).toArray();
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public DBObject createTask(Map<String, Object> args) {
+    public DBObject createTask(DBObject task) {
         ObjectId taskId = new ObjectId();
-
-        DBObject task = new BasicDBObject(args);
         task.put("_id", taskId);
 
         tasks.insert(task);
@@ -64,12 +60,8 @@ public class TasksService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public DBObject saveTask(Map<String, Object> args) {
-        ObjectId taskId = new ObjectId((String) args.get("_id"));
-
-        DBObject task = new BasicDBObject(args);
-        task.put("_id", taskId);
-
+    public DBObject saveTask(DBObject task) {
+        ObjectId taskId = (ObjectId) task.get("_id");
         tasks.update(new BasicDBObject("_id", taskId), task);
         return tasks.findOne(new BasicDBObject("_id", taskId));
     }
@@ -77,7 +69,7 @@ public class TasksService {
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public DBObject deleteTask(String id) {
+    public DBObject deleteTask(@PathParam("id") String id) {
         return tasks.findAndRemove(new BasicDBObject("_id", new ObjectId(id)));
     }
 }
