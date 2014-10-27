@@ -20,14 +20,14 @@ public class TasksService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<DBObject> listTasks() {
-        return tasks.find().toArray();
+        return null;
     }
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public DBObject getTask(String id) {
-        return tasks.findOne(new BasicDBObject("_id", new ObjectId(id)));
+        return null;
     }
 
     @GET
@@ -36,37 +36,27 @@ public class TasksService {
     public List<DBObject> getTasksByData(@PathParam("year") Integer year,
                                          @PathParam("month") Integer month,
                                          @PathParam("day") Integer day) {
-        DBObject dateRange = new BasicDBObject();
-        dateRange.put("$lt", new Date(year-1900, month-1, day+1, 0, 0));
-        dateRange.put("$gte", new Date(year-1900, month-1, day, 0, 0));
-        DBObject query = new BasicDBObject("date", dateRange);
-        return tasks.find(query).toArray();
+        return null;
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public DBObject createTask(DBObject task) {
-        ObjectId taskId = new ObjectId();
-        task.put("_id", taskId);
-
-        tasks.insert(task);
-        return tasks.findOne(new BasicDBObject("_id", taskId));
+        return null;
     }
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public DBObject saveTask(DBObject task) {
-        ObjectId taskId = (ObjectId) task.get("_id");
-        tasks.update(new BasicDBObject("_id", taskId), task);
-        return tasks.findOne(new BasicDBObject("_id", taskId));
+        return null;
     }
 
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public DBObject deleteTask(@PathParam("id") String id) {
-        return tasks.findAndRemove(new BasicDBObject("_id", new ObjectId(id)));
+        return null;
     }
 }
