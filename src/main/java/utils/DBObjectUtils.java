@@ -39,7 +39,7 @@ public class DBObjectUtils {
             Map result = dbObject.toMap();
             Object id = result.get("_id");
             if (id != null && id instanceof ObjectId) {
-                result.put("_id", ((ObjectId) id).toString());
+                result.put("_id", id.toString());
             }
             jsonGenerator.writeObject(result);
         }
