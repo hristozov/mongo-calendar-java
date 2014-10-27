@@ -4,8 +4,8 @@ mongo-calendar-java
 
 Организация
 -----------
-* [Server](/blob/master/src/main/java/Server.java) е главният клас, който трябва да пуснете за да тръгне приложението
-* [TasksService](/blob/master/src/main/java/service/TasksService.java) съдържа REST услугата и осигурява операциите
-* [pom.xml](/blob/master/pom.xml) съдържа Maven конфигурацията
-* [/di](/blob/master/src/main/java/di) съдържа класове, необходими за dependency injection
-* [/utils](/blob/master/src/main/java/utils) съдържа различни utility класове за приложението
+* [Server](/src/main/java/Server.java) е главният клас, който трябва да пуснете за да тръгне приложението
+* [TasksService](/src/main/java/service/TasksService.java) съдържа REST услугата и осигурява операциите
+* [pom.xml](/pom.xml) съдържа Maven конфигурацията
+* [/di](/src/main/java/di) съдържа класове, необходими за dependency injection
+* [/utils](/src/main/java/utils) съдържа различни utility класове за приложението
