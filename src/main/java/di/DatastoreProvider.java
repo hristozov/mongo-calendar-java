@@ -1,18 +1,22 @@
 package di;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Provides;
-import com.mongodb.DB;
 import com.mongodb.MongoClient;
+import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.Morphia;
 
 import java.net.UnknownHostException;
 
-public class DatabaseProvider implements Provider<DB> {
+public class DatastoreProvider implements Provider<Datastore> {
+    private static final String SERVER = "localhost";
     private static final String DATABASE_NAME = "calendar";
-    private static final String server = "localhost";
-    private static DB instance;
+    private final Morphia morphia;
+    private Datastore instance;
 
-    public DatabaseProvider() {
+    @Inject
+    public DatastoreProvider(Morphia morphia) {
+        this.morphia = morphia;
         initializeInstanceIfNecessary();
     }
 
@@ -22,16 +26,15 @@ public class DatabaseProvider implements Provider<DB> {
         }
         MongoClient mongoClient;
         try {
-            mongoClient = new MongoClient(server);
+            mongoClient = new MongoClient(SERVER);
         } catch (UnknownHostException e) {
-            // Oh shit. Give up.
             throw new RuntimeException(e);
         }
-        instance = mongoClient.getDB(DATABASE_NAME);
+        instance = morphia.createDatastore(mongoClient, DATABASE_NAME);
     }
 
     @Override
-    public DB get() {
+    public Datastore get() {
         return instance;
     }
 }

@@ -13,7 +13,7 @@ import java.net.URI;
 
 public class Server {
     private static URI getBaseURI() {
-        return UriBuilder.fromUri("http://0.0.0.0/").port(8080).build();
+        return UriBuilder.fromUri("http://0.0.0.0/").port(9292).build();
     }
 
     public static void main(String[] args) {

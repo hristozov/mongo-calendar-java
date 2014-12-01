@@ -1,72 +1,66 @@
 package service;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import org.bson.types.ObjectId;
+import model.Task;
+import org.mongodb.morphia.Datastore;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 
 @Path("/tasks")
 public class TasksService {
     @Inject
-    @Named("tasks")
-    public DBCollection tasks;
+    public Datastore datastore;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DBObject> listTasks() {
-        return tasks.find().toArray();
+    public List<Task> listTasks() {
+        return datastore.find(Task.class).asList();
     }
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public DBObject getTask(String id) {
-        return tasks.findOne(new BasicDBObject("_id", new ObjectId(id)));
+    public Task getTask(String id) {
+        return datastore.get(Task.class, id);
     }
 
     @GET
     @Path("/for_date/{year}-{month}-{day}")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DBObject> getTasksByData(@PathParam("year") Integer year,
-                                         @PathParam("month") Integer month,
-                                         @PathParam("day") Integer day) {
-        DBObject dateRange = new BasicDBObject();
-        dateRange.put("$lt", new Date(year-1900, month-1, day+1, 0, 0));
-        dateRange.put("$gte", new Date(year-1900, month-1, day, 0, 0));
-        DBObject query = new BasicDBObject("date", dateRange);
-        return tasks.find(query).toArray();
+    public Task getTasksByData(@PathParam("year") Integer year,
+                               @PathParam("month") Integer month,
+                               @PathParam("day") Integer day) {
+        return datastore.createQuery(Task.class)
+                .filter("date >= ", new Date(year - 1900, month - 1, day, 0, 0))
+                .filter("date <", new Date(year - 1900, month - 1, day + 1, 0, 0))
+                .get();
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public DBObject createTask(DBObject task) {
-        ObjectId taskId = new ObjectId();
-        task.put("_id", taskId);
-
-        tasks.insert(task);
-        return tasks.findOne(new BasicDBObject("_id", taskId));
+    public Task createTask(Task task) {
+        datastore.save(task);
+        return task;
     }
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public DBObject saveTask(DBObject task) {
-        ObjectId taskId = (ObjectId) task.get("_id");
-        tasks.update(new BasicDBObject("_id", taskId), task);
-        return tasks.findOne(new BasicDBObject("_id", taskId));
+    public Task saveTask(Task task) {
+        datastore.save(task);
+        return task;
     }
 
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public DBObject deleteTask(@PathParam("id") String id) {
-        return tasks.findAndRemove(new BasicDBObject("_id", new ObjectId(id)));
+    public Task deleteTask(@PathParam("id") String id) {
+        Task deleted = datastore.get(Task.class, id);
+        datastore.delete(Task.class, id);
+        return deleted;
     }
 }
