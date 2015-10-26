@@ -17,7 +17,7 @@ import java.lang.reflect.Type;
 @Provider
 @Produces("application/json")
 public class JsonMessageBodyWriter implements MessageBodyWriter {
-    private ObjectMapper objectMapper = DBObjectUtils.getMapper();
+    private ObjectMapper objectMapper = DocumentUtils.getMapper();
 
     @Override
     public long getSize(Object obj, Class type, Type genericType,

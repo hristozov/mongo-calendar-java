@@ -3,14 +3,16 @@ package di;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.mongodb.DB;
+import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
 
 import java.net.UnknownHostException;
 
-public class DatabaseProvider implements Provider<DB> {
+public class DatabaseProvider implements Provider<MongoDatabase> {
     private static final String DATABASE_NAME = "calendar";
     private static final String server = "localhost";
-    private static DB instance;
+    private static MongoDatabase instance;
 
     public DatabaseProvider() {
         initializeInstanceIfNecessary();
@@ -21,17 +23,12 @@ public class DatabaseProvider implements Provider<DB> {
             return;
         }
         MongoClient mongoClient;
-        try {
-            mongoClient = new MongoClient(server);
-        } catch (UnknownHostException e) {
-            // Oh shit. Give up.
-            throw new RuntimeException(e);
-        }
-        instance = mongoClient.getDB(DATABASE_NAME);
+        mongoClient = new MongoClient(server);
+        instance = mongoClient.getDatabase(DATABASE_NAME);
     }
 
     @Override
-    public DB get() {
+    public MongoDatabase get() {
         return instance;
     }
 }

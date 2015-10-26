@@ -1,11 +1,9 @@
 package utils;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.DeserializationContext;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -18,12 +16,9 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
-public class DBObjectUtils {
+public class DocumentUtils {
     private static String dateToTZString(Date date) {
         return getFormat().format(date).toString();
     }
@@ -52,23 +47,23 @@ public class DBObjectUtils {
 
     public static ObjectMapper getMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
-        SimpleModule dbObjectModule = new SimpleModule("DBObjectModule", new Version(1, 0, 0, null));
-        dbObjectModule.addDeserializer(DBObject.class, new DBObjectDeserializer());
-        dbObjectModule.addSerializer(DBObject.class, new DBObjectSerializer());
-        objectMapper.registerModule(dbObjectModule);
+        SimpleModule documentModule = new SimpleModule("DocumentModule", new Version(1, 0, 0, null));
+        documentModule.addDeserializer(Document.class, new DocumentDeserializer());
+        documentModule.addSerializer(Document.class, new DocumentSerializer());
+        objectMapper.registerModule(documentModule);
         return objectMapper;
     }
 
-    private static class DBObjectSerializer extends SerializerBase<DBObject> {
-        protected DBObjectSerializer() {
-            super(DBObject.class);
+    private static class DocumentSerializer extends SerializerBase<Document> {
+        protected DocumentSerializer() {
+            super(Document.class);
         }
 
         @Override
-        public void serialize(DBObject dbObject,
+        public void serialize(Document document,
                               JsonGenerator jsonGenerator,
                               SerializerProvider serializerProvider) throws IOException {
-            Map result = dbObject.toMap();
+            Map result = new HashMap(document);
             Object id = result.get("_id");
             if (id instanceof ObjectId) {
                 result.put("id", id.toString());
@@ -82,20 +77,20 @@ public class DBObjectUtils {
         }
     }
 
-    private static class DBObjectDeserializer extends StdDeserializer<DBObject> {
-        protected DBObjectDeserializer() {
-            super(DBObject.class);
+    private static class DocumentDeserializer extends StdDeserializer<Document> {
+        protected DocumentDeserializer() {
+            super(Document.class);
         }
 
         @Override
-        public DBObject deserialize(JsonParser jsonParser,
+        public Document deserialize(JsonParser jsonParser,
                                     DeserializationContext deserializationContext) throws IOException {
             Map map = jsonParser.readValueAs(Map.class);
-            DBObject result = new BasicDBObject(map);
+            Document result = new Document(map);
             Object id = result.get("id");
             if (id != null && id instanceof String) {
                 result.put("_id", new ObjectId((String) id));
-                result.removeField("id");
+                result.remove("id");
             }
             Object date = result.get("date");
             if (date instanceof String) {

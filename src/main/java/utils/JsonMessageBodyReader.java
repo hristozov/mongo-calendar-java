@@ -18,7 +18,7 @@ import java.lang.reflect.Type;
 @Provider
 @Consumes("application/json")
 public class JsonMessageBodyReader implements MessageBodyReader {
-    private ObjectMapper objectMapper = DBObjectUtils.getMapper();
+    private ObjectMapper objectMapper = DocumentUtils.getMapper();
 
     @Override
     public boolean isReadable(Class type, Type genericType, Annotation[] annotations, MediaType mediaType) {
