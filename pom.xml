@@ -92,7 +92,7 @@
         <dependency>
             <groupId>org.mongodb.morphia</groupId>
             <artifactId>morphia</artifactId>
-            <version>0.108</version>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
 </project>
